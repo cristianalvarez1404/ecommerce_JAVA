@@ -4,8 +4,10 @@ import com.zosh.config.JwtProvider;
 import com.zosh.domain.USER_ROLE;
 import com.zosh.modal.Cart;
 import com.zosh.modal.User;
+import com.zosh.modal.VerificationCode;
 import com.zosh.repository.CartRepository;
 import com.zosh.repository.UserRepository;
+import com.zosh.repository.VerificationCodeRepository;
 import com.zosh.response.SignupRequest;
 import com.zosh.service.AuthService;
 import io.jsonwebtoken.Jwt;
@@ -28,9 +30,17 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final CartRepository cartRepository;
     private final JwtProvider jwtProvider;
+    private final VerificationCodeRepository verificationCodeRepository;
 
     @Override
-    public String createUser(SignupRequest req) {
+    public String createUser(SignupRequest req) throws Exception {
+
+        VerificationCode verificationCode = verificationCodeRepository.findByEmail(req.getEmail());
+
+        if(verificationCode == null ){
+            throw new Exception("wrong otp...");
+        }
+
         User user = userRepository.findByEmail(req.getEmail());
 
         if(user == null){
