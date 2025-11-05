@@ -4,6 +4,7 @@ import com.zosh.domain.USER_ROLE;
 import com.zosh.modal.User;
 import com.zosh.modal.VerificationCode;
 import com.zosh.repository.UserRepository;
+import com.zosh.request.LoginRequest;
 import com.zosh.response.ApiResponse;
 import com.zosh.response.AuthResponse;
 import com.zosh.response.SignupRequest;
@@ -46,5 +47,13 @@ public class AuthController {
         res.setMessage("otp sent successfully");
 
         return ResponseEntity.ok(res);
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<AuthResponse> loginHandler(@RequestBody LoginRequest req) throws Exception {
+
+        AuthResponse authResponse = authService.signing(req);
+
+        return ResponseEntity.ok(authResponse);
     }
 }
