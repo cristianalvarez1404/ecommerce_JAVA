@@ -4,6 +4,7 @@ import com.zosh.domain.USER_ROLE;
 import com.zosh.modal.User;
 import com.zosh.modal.VerificationCode;
 import com.zosh.repository.UserRepository;
+import com.zosh.request.LoginOtpRequest;
 import com.zosh.request.LoginRequest;
 import com.zosh.response.ApiResponse;
 import com.zosh.response.AuthResponse;
@@ -38,9 +39,9 @@ public class AuthController {
     }
 
     @PostMapping("/sent/login-signup-otp")
-    public ResponseEntity<ApiResponse> sentOtpHandler(@RequestBody VerificationCode req) throws Exception {
+    public ResponseEntity<ApiResponse> sentOtpHandler(@RequestBody LoginOtpRequest req) throws Exception {
 
-        authService.sentLoginOtp(req.getEmail());
+        authService.sentLoginOtp(req.getEmail(),req.getRole());
 
         ApiResponse res = new ApiResponse();
 

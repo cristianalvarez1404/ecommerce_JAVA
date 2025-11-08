@@ -3,9 +3,11 @@ package com.zosh.service.impl;
 import com.zosh.config.JwtProvider;
 import com.zosh.domain.USER_ROLE;
 import com.zosh.modal.Cart;
+import com.zosh.modal.Seller;
 import com.zosh.modal.User;
 import com.zosh.modal.VerificationCode;
 import com.zosh.repository.CartRepository;
+import com.zosh.repository.SellerRepository;
 import com.zosh.repository.UserRepository;
 import com.zosh.repository.VerificationCodeRepository;
 import com.zosh.request.LoginRequest;
@@ -41,17 +43,27 @@ public class AuthServiceImpl implements AuthService {
     private final VerificationCodeRepository verificationCodeRepository;
     private final EmailService emailService;
     private final CustomUserServiceImpl customUserService;
+    private final SellerRepository sellerRepository;
 
     @Override
-    public void sentLoginOtp(String email) throws Exception {
-        String SIGNING_PREFIX = "signin_";
+    public void sentLoginOtp(String email, USER_ROLE role) throws Exception {
+        String SIGNING_PREFIX = "signing_";
+        String SELLER_PREFIX = "seller_";
 
         if(email.startsWith(SIGNING_PREFIX)){
             email = email.substring(SIGNING_PREFIX.length());
 
-            User user = userRepository.findByEmail(email);
-            if (user == null){
-                throw new Exception("user not exist with provided email");
+            if(role.equals(USER_ROLE.ROLE_SELLER)){
+                Seller seller = sellerRepository.findByEmail(email);
+                if (seller == null){
+                    throw new Exception("seller not found");
+                }
+            }
+            else {
+                User user = userRepository.findByEmail(email);
+                if (user == null){
+                    throw new Exception("user not exist with provided email");
+                }
             }
         }
 
