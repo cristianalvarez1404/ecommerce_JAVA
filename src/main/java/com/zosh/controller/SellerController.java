@@ -1,6 +1,9 @@
 package com.zosh.controller;
 
+import com.zosh.config.JwtProvider;
+import com.zosh.domain.AccountStatus;
 import com.zosh.modal.Seller;
+import com.zosh.modal.SellerReport;
 import com.zosh.modal.VerificationCode;
 import com.zosh.repository.VerificationCodeRepository;
 import com.zosh.request.LoginOtpRequest;
@@ -17,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 public class SellerController {
@@ -24,6 +29,7 @@ public class SellerController {
     private final VerificationCodeRepository verificationCodeRepository;
     private final AuthService authService;
     private final EmailService emailService;
+    private final JwtProvider jwtProvider;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> loginSeller(
@@ -66,8 +72,53 @@ public class SellerController {
         String subject = "Zosh Bazaar Email Verification Code";
         String text = "Welcome to Zosh Bazaar, verify your account using this link";
         String fronted_url = "http://localhost:3000/verify-seller/";
-        emailService.sendVerificationOtpEmail(seller.getEmail(),verificationCode.getOtp(), subject,text);
+        emailService.sendVerificationOtpEmail(seller.getEmail(),verificationCode.getOtp(), subject,text + fronted_url);
         return new ResponseEntity<>(savedSeller,HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Seller> getSellerById(@PathVariable Long id) throws Exception {
+        Seller seller = sellerService.getSellerById(id);
+        return new ResponseEntity<>(seller, HttpStatus.OK);
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<Seller> getSellerByJwt (
+            @RequestHeader("Authorization") String jwt
+    ) throws Exception {
+        Seller seller = sellerService.getSellerProfile(jwt);
+        return new ResponseEntity<>(seller, HttpStatus.OK);
+    }
+
+//    @GetMapping("/report")
+//    public ResponseEntity<SellerReport> getSellerReport(
+//            @RequestHeader("Authorization") String jwt
+//    ) throws Exception {
+//        String email = jwtProvider.getEmailFromJwtToken(jwt);
+//        Seller seller = sellerService.getSellerByEmail(email);
+//        SellerReport report = sellerReportService.getSellerReport(seller);
+//        return new ResponseEntity<>(report, HttpStatus.OK);
+//    }
+
+    @GetMapping()
+    public ResponseEntity<List<Seller>> getAllSellers(
+            @RequestParam(required = false)AccountStatus status
+            ){
+        List<Seller> sellers = sellerService.getAllSellers(status);
+        return ResponseEntity.ok(sellers);
+    }
+
+    @PatchMapping()
+    public ResponseEntity<Seller> updateSeller(@RequestHeader("Authorization") String jwt, @RequestBody Seller seller)throws Exception {
+        Seller profile = sellerService.getSellerProfile(jwt);
+        Seller updatedSeller = sellerService.updateSeller(profile.getId(), seller);
+        return ResponseEntity.ok(updatedSeller);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSeller(@PathVariable Long id) throws Exception {
+        sellerService.deleteSeller(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
