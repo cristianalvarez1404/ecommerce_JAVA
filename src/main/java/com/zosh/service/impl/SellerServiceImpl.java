@@ -3,6 +3,7 @@ package com.zosh.service.impl;
 import com.zosh.config.JwtProvider;
 import com.zosh.domain.AccountStatus;
 import com.zosh.domain.USER_ROLE;
+import com.zosh.exceptions.SellerException;
 import com.zosh.modal.Address;
 import com.zosh.modal.Seller;
 import com.zosh.repository.AddressRepository;
@@ -54,9 +55,9 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
-    public Seller getSellerById(Long id) throws Exception {
+    public Seller getSellerById(Long id) throws SellerException {
         return sellerRepository.findById(id)
-                .orElseThrow(() -> new Exception("seller not found with id " + id));
+                .orElseThrow(() -> new SellerException("seller not found with id " + id));
     }
 
     @Override
