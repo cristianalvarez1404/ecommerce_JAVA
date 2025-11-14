@@ -12,6 +12,9 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -109,7 +112,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> getAllProducts(String category, String brand, String colors, String sizes, Integer minPrice, Integer maxPrice, Integer minDiscount, String sort, String stock, Integer pageNumber) {
+    public Page<Product> getAllProducts(String category,
+                                        String brand,
+                                        String colors,
+                                        String sizes,
+                                        Integer minPrice,
+                                        Integer maxPrice,
+                                        Integer minDiscount,
+                                        String sort,
+                                        String stock,
+                                        Integer pageNumber) {
 
         Specification<Product> spec = (root,query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -146,11 +158,27 @@ public class ProductServiceImpl implements ProductService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        return null;
+        Pageable pageable;
+
+        if(sort != null && !sort.isEmpty()){
+            pageable = switch (sort){
+                case "price_low" -> PageRequest.of(pageNumber != null ? pageNumber : 0, 10,
+                            Sort.by("sellingPrice").ascending());
+                case "price_high" -> PageRequest.of(pageNumber != null ? pageNumber : 0, 10,
+                            Sort.by("sellingPrice").descending());
+                default -> PageRequest.of(pageNumber != null ? pageNumber : 0, 10,
+                            Sort.unsorted());
+            };
+        }
+        else {
+            pageable = PageRequest.of(pageNumber != null ? pageNumber:0 , 10, Sort.unsorted());
+        }
+
+        return productRepository.findAll(spec,pageable);
     }
 
     @Override
     public List<Product> getProductBySellerId(Long sellerId) {
-        return List.of();
+        return productRepository.findBySellerId(sellerId);
     }
 }
