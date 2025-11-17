@@ -12,7 +12,7 @@ public interface ProductService {
     void deleteProduct(Long productId) throws ProductException;
     Product updateProduct(Long productId, Product product) throws ProductException;
     Product findProductById(Long productId) throws ProductException;
-    List<Product> searchProducts();
+    List<Product> searchProducts(String query);
     Page<Product> getAllProducts(
             String category,
             String brand,
