@@ -83,27 +83,41 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Order findOrderByUser(User user) {
-        return null;
+    public Order findOrderById(Long id) throws Exception {
+        return orderRepository.findById(id).orElseThrow(()-> new Exception("order not found..."));
     }
 
     @Override
     public List<Order> usersOrderHistory(Long userId) {
-        return List.of();
+        return orderRepository.findByUserId(userId);
     }
 
     @Override
     public List<Order> sellersOrder(Long sellerId) {
-        return List.of();
+        return orderRepository.findBySellerId(sellerId);
     }
 
     @Override
-    public Order updateOrderStatus(Long orderId, OrderStatus orderStatus) {
-        return null;
+    public Order updateOrderStatus(Long orderId, OrderStatus orderStatus) throws Exception {
+        Order order = findOrderById(orderId);
+        order.setOrderStatus(orderStatus);
+
+        return orderRepository.save(order);
     }
 
     @Override
-    public Order cancelOrder(Long orderId, User user) {
-        return null;
+    public Order cancelOrder(Long orderId, User user) throws Exception {
+        Order order = findOrderById(orderId);
+
+        if(!user.getId().equals(order.getUser().getId())){
+            throw new Exception("you don't have access to this order");
+        }
+        order.setOrderStatus(OrderStatus.CANCELLED);
+        return order;
+    }
+
+    @Override
+    public OrderItem getOrderItemById(Long id) throws Exception {
+        return orderItemRepository.findById(id).orElseThrow(() -> new Exception("order item not exist..."));
     }
 }
