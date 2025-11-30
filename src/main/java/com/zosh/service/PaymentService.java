@@ -1,5 +1,6 @@
 package com.zosh.service;
 
+import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentLink;
 import com.zosh.modal.Order;
 import com.zosh.modal.PaymentOrder;
@@ -19,5 +20,5 @@ public interface PaymentService {
                                           Long orderId);
     String createStripePaymentLink(User user,
                                    Long amount,
-                                   Long orderId);
+                                   Long orderId) throws StripeException;
 }

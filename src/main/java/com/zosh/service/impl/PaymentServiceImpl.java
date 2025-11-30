@@ -1,7 +1,11 @@
 package com.zosh.service.impl;
 
 import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentLink;
+import com.stripe.model.checkout.Session;
+import com.stripe.param.checkout.SessionCreateParams;
 import com.zosh.domain.PaymentOrderStatus;
 import com.zosh.domain.PaymentStatus;
 import com.zosh.modal.Order;
@@ -24,6 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private String apiKey = "apikey";
     private String apiSecret = "apisecret";
+    private String stripeSecretKey = "stripesecretkey";
 
     @Override
     public PaymentOrder createOrder(User user, Set<Order> orders) {
@@ -118,7 +123,29 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public String createStripePaymentLink(User user, Long amount, Long orderId) {
-        return "";
+    public String createStripePaymentLink(User user, Long amount, Long orderId) throws StripeException {
+        Stripe.apiKey = stripeSecretKey;
+
+        SessionCreateParams params = SessionCreateParams.builder()
+                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                .setMode(SessionCreateParams.Mode.PAYMENT)
+                .setSuccessUrl("http://localhost:3000/payment-success/" + orderId)
+                .setCancelUrl("http://localhost:3000/payment-cancel")
+                .addLineItem(SessionCreateParams.LineItem.builder()
+                        .setQuantity(1L)
+                        .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
+                                .setCurrency("usd")
+                                .setUnitAmount(amount * 100)
+                                .setProductData(
+                                        SessionCreateParams
+                                                .LineItem.PriceData.ProductData
+                                                .builder().setName("joe payment")
+                                                .build()
+                                ).build()
+                        ).build()
+                ).build();
+
+        Session session = Session.create(params);
+        return session.getUrl();
     }
 }
