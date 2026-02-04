@@ -15,6 +15,7 @@ import com.zosh.repository.OrderRepository;
 import com.zosh.repository.PaymentOrderRepository;
 import com.zosh.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -26,8 +27,13 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentOrderRepository paymentOrderRepository;
     private final OrderRepository orderRepository;
 
-    private String apiKey = "apikey";
+    @Value("${stripe.api.key}")
+    private String apiKey;
+
+    @Value("${razorpay.api.secret}")
     private String apiSecret = "apisecret";
+
+    @Value("${stripe.api.key}")
     private String stripeSecretKey = "stripesecretkey";
 
     @Override
