@@ -4,9 +4,12 @@ import com.zosh.modal.Deal;
 import com.zosh.response.ApiResponse;
 import com.zosh.service.DealService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -14,6 +17,13 @@ import org.springframework.web.bind.annotation.*;
 public class DealController {
 
     private final DealService dealService;
+
+    @GetMapping
+    public ResponseEntity<List<Deal>> getDeals(){
+        List<Deal> getDeals = dealService.getDeals();
+        return new ResponseEntity<>(getDeals, HttpStatus.ACCEPTED);
+    }
+
 
     @PostMapping
     public ResponseEntity<Deal> createDeals(
